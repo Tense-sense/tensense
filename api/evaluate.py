@@ -31,7 +31,7 @@ class handler(BaseHTTPRequestHandler):
             except Exception:
                 pass
 
-        api_key = os.environ.get('GROQ_API_KEY') or env.get('GROQ_API_KEY')
+        api_key = os.environ.get('TENSENSEGROQ') or os.environ.get('tensensegroq') or os.environ.get('GROQ_API_KEY') or env.get('TENSENSEGROQ') or env.get('tensensegroq') or env.get('GROQ_API_KEY')
         model = req_data.get('model', 'llama-3.3-70b-versatile')
         tense = req_data.get('tense')
         prompt = req_data.get('prompt')

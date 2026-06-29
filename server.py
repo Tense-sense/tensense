@@ -47,7 +47,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
             # Fallback to server env keys if client didn't supply one
             if not api_key:
                 if provider == 'groq':
-                    api_key = os.environ.get('GROQ_API_KEY') or ENV_VARS.get('GROQ_API_KEY')
+                    api_key = os.environ.get('TENSENSEGROQ') or os.environ.get('tensensegroq') or os.environ.get('GROQ_API_KEY') or ENV_VARS.get('TENSENSEGROQ') or ENV_VARS.get('tensensegroq') or ENV_VARS.get('GROQ_API_KEY')
                 elif provider == 'gemini':
                     api_key = os.environ.get('GEMINI_API_KEY') or ENV_VARS.get('GEMINI_API_KEY')
 
