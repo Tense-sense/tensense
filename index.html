@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TenseSense - Dynamic English Grammar Tense Practice</title>
+  <meta name="description" content="Improve your English grammar by practicing all 12 tenses. Write essays based on prompts, evaluated on grammar, tense accuracy, and context matching.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Confetti Canvas overlay -->
+  <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+
+  <!-- Header Navigation -->
+  <header>
+    <div class="nav-container">
+      <div class="logo" id="nav-logo">
+        <span class="logo-icon">⚡</span> TenseSense
+      </div>
+      <div class="nav-actions">
+        <button class="btn-circle" id="btn-settings" title="Settings" aria-label="Settings">
+          ⚙️
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main>
+    
+    <!-- VIEW: Essay Tense Selector (Dashboard) -->
+    <section id="view-essay-select" class="view-section active">
+      <div class="welcome-container">
+        <h1 class="welcome-title">Practice English Tenses with <span>TenseSense</span></h1>
+        <p class="welcome-subtitle font-size: 1.1rem; color: var(--text-muted);">
+          Pilih salah satu dari 12 tense di bawah ini untuk memulai latihan menulis kalimat.
+        </p>
+      </div>
+      
+      <div id="tense-selection-grid" class="tense-grid">
+        <!-- Dynamically populated from JS -->
+      </div>
+    </section>
+
+    <!-- VIEW: Essay Play / Writing Screen -->
+    <section id="view-essay-play" class="view-section">
+      <div class="section-header">
+        <div class="section-title-area">
+          <button class="btn btn-secondary" id="btn-back-essay-play">← Pilih Tense</button>
+          <div>
+            <h2 class="section-title" id="essay-tense-name">Tense Name</h2>
+            <p class="section-subtitle" id="essay-tense-formula">Formula</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="essay-container">
+        <!-- Writing Area -->
+        <div class="essay-panel-left">
+          <div class="essay-card">
+            <span class="prompt-badge">Writing Prompt</span>
+            <div class="prompt-text" id="essay-prompt-text">Prompt text goes here...</div>
+            <button class="btn btn-secondary" id="btn-new-prompt">🔄 Acak Prompt Baru</button>
+          </div>
+          
+          <div class="essay-card">
+            <div class="essay-input-area">
+              <label for="essay-user-input">Tulis kalimat Anda:</label>
+              <textarea id="essay-user-input" class="essay-textarea" placeholder="Tulis kalimat bahasa Inggris Anda di sini sesuai dengan tense dan prompt di atas..."></textarea>
+            </div>
+            <div class="essay-actions">
+              <button class="btn btn-primary" id="essay-submit-btn">Periksa Kalimat ✨</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Evaluation Results Area -->
+        <div class="essay-panel-right">
+          <!-- Loading State -->
+          <div class="essay-card loading-box" id="essay-loading">
+            <div class="spinner"></div>
+            <div class="loading-text">Sedang menganalisis kalimat Anda...</div>
+          </div>
+          
+          <!-- Results Box -->
+          <div class="essay-card eval-box" id="essay-evaluation">
+            <div class="score-badge-container">
+              <div class="score-radial" id="essay-score-radial">0</div>
+              <div class="score-text-block">
+                <h4 id="essay-score-title">Hasil Penilaian</h4>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Nilai keseluruhan tata bahasa</p>
+              </div>
+            </div>
+            
+            <!-- Target Match Badges -->
+            <div class="status-badge-container">
+              <div class="status-badge-row">
+                <span class="status-badge-label">Kesesuaian Tense:</span>
+                <span class="status-badge" id="eval-tense-match-badge">Checking...</span>
+              </div>
+              <div class="status-badge-row" style="margin-top: 0.5rem;">
+                <span class="status-badge-label">Kesesuaian Konteks:</span>
+                <span class="status-badge" id="eval-context-match-badge">Checking...</span>
+              </div>
+            </div>
+            
+            <div class="eval-detail-section">
+              <div class="eval-item">
+                <span class="eval-item-label">Analisis & Koreksi AI</span>
+                <span class="eval-item-val" id="eval-explanation">Penjelasan detail akan muncul di sini.</span>
+              </div>
+              
+              <div class="eval-item" id="eval-diff-section" style="display: none;">
+                <!-- Tense Correction Block -->
+                <div id="eval-tense-correction-block">
+                  <span class="eval-item-label">Koreksi Tense Kalimat Anda</span>
+                  <div class="eval-correction-diff" id="eval-diff-container" style="margin-bottom: 1rem;">
+                    <!-- Diff text -->
+                  </div>
+                </div>
+
+                <!-- Context Recommendation Block -->
+                <div id="eval-context-recommendation-block">
+                  <span class="eval-item-label">Saran Kalimat Sesuai Konteks</span>
+                  <div class="eval-correction-diff" id="eval-context-recommendation-container" style="border-left-color: var(--secondary); margin-bottom: 1rem;">
+                    <!-- Recommendation text -->
+                  </div>
+                </div>
+
+                <p class="prompt-help" id="eval-diff-explanation">Alasan perbaikan.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Settings Modal Overlay -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">⚙️ API Settings</h3>
+        <button class="modal-close" id="btn-close-settings" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="settings-form">
+        <div class="form-group">
+          <label for="provider-select">AI Provider</label>
+          <select id="provider-select" class="form-control">
+            <option value="groq">Groq (Ultra Fast)</option>
+            <option value="gemini">Google Gemini</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="api-key-input">API Key</label>
+          <input type="password" id="api-key-input" class="form-control" placeholder="Masukkan API Key Anda...">
+          <p class="info-note">API Key disimpan secara lokal di browser Anda dan tidak pernah dikirim ke pihak luar.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="model-select">AI Model</label>
+          <select id="model-select" class="form-control">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-close-settings-cancel" onclick="document.getElementById('settings-modal').classList.remove('active')">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Pengaturan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>TenseSense Grammar Game &copy; 2026. Made with ❤️ untuk belajar bahasa Inggris lebih menyenangkan.</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="sentences.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
