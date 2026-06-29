@@ -16,12 +16,6 @@ const state = {
 // DOM Elements
 const views = {};
 const navLogo = document.getElementById('nav-logo');
-const btnSettings = document.getElementById('btn-settings');
-const settingsModal = document.getElementById('settings-modal');
-const settingsForm = document.getElementById('settings-form');
-const btnCloseSettings = document.getElementById('btn-close-settings');
-const providerSelect = document.getElementById('provider-select');
-const modelSelect = document.getElementById('model-select');
 
 // Initialize Views
 const viewIds = ['essay-select', 'essay-play'];
@@ -29,20 +23,9 @@ viewIds.forEach(id => {
   views[id] = document.getElementById(`view-${id}`);
 });
 
-// Load Settings from LocalStorage
+// Load Settings from LocalStorage (migration check only)
 function loadSettings() {
-  const savedProvider = localStorage.getItem('grammar_game_provider');
-  const savedKey = localStorage.getItem('grammar_game_api_key');
   const savedModel = localStorage.getItem('grammar_game_model');
-  
-  if (savedProvider) state.settings.provider = savedProvider;
-  
-  // Use saved key if available, otherwise default to empty (server will fall back to its .env key)
-  if (savedKey) {
-    state.settings.apiKey = savedKey;
-  } else {
-    state.settings.apiKey = '';
-  }
   
   if (savedModel === 'llama-3.3-70b-specdec') {
     state.settings.model = 'llama-3.3-70b-versatile';
@@ -50,64 +33,7 @@ function loadSettings() {
   } else if (savedModel) {
     state.settings.model = savedModel;
   }
-  
-  // Sync UI elements
-  providerSelect.value = state.settings.provider;
-  document.getElementById('api-key-input').value = state.settings.apiKey;
-  
-  updateModelOptions();
-  modelSelect.value = state.settings.model;
 }
-
-// Update model choices based on selected provider
-function updateModelOptions() {
-  const provider = providerSelect.value;
-  modelSelect.innerHTML = '';
-  
-  const models = {
-    groq: [
-      { value: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B (Versatile - Recommended)' },
-      { value: 'llama-3.1-8b-instant', label: 'Llama 3.1 8B Instant (Fast)' },
-      { value: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B' }
-    ],
-    gemini: [
-      { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash (Recommended)' },
-      { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro (Powerful)' }
-    ]
-  };
-  
-  models[provider].forEach(m => {
-    const opt = document.createElement('option');
-    opt.value = m.value;
-    opt.textContent = m.label;
-    modelSelect.appendChild(opt);
-  });
-}
-
-// Save Settings
-settingsForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  state.settings.provider = providerSelect.value;
-  state.settings.apiKey = document.getElementById('api-key-input').value.trim();
-  state.settings.model = modelSelect.value;
-  
-  localStorage.setItem('grammar_game_provider', state.settings.provider);
-  localStorage.setItem('grammar_game_api_key', state.settings.apiKey);
-  localStorage.setItem('grammar_game_model', state.settings.model);
-  
-  settingsModal.classList.remove('active');
-  alert("Pengaturan API berhasil disimpan!");
-});
-
-// Settings Modal Toggle
-btnSettings.addEventListener('click', () => settingsModal.classList.add('active'));
-btnCloseSettings.addEventListener('click', () => settingsModal.classList.remove('active'));
-settingsModal.addEventListener('click', (e) => {
-  if (e.target === settingsModal) settingsModal.classList.remove('active');
-});
-providerSelect.addEventListener('change', () => {
-  updateModelOptions();
-});
 
 // View Navigation
 function navigateTo(viewId) {
@@ -288,17 +214,8 @@ function getMockEvaluation(tense, prompt, sentence) {
   };
 };
 
-// Call LLM API (via local Python proxy server to bypass CORS)
+// Call LLM API (via Vercel or local Python proxy server)
 async function evaluateSentence(tense, prompt, sentence) {
-  if (!state.settings.apiKey) {
-    // Return mock response after a short delay
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(getMockEvaluation(tense, prompt, sentence));
-      }, 1200);
-    });
-  }
-
   const payload = {
     provider: state.settings.provider,
     apiKey: state.settings.apiKey,

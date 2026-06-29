@@ -19,9 +19,7 @@
         <span class="logo-icon">⚡</span> TenseSense
       </div>
       <div class="nav-actions">
-        <button class="btn-circle" id="btn-settings" title="Settings" aria-label="Settings">
-          ⚙️
-        </button>
+        <!-- Settings disabled for secure env deployment -->
       </div>
     </div>
   </header>
@@ -138,42 +136,7 @@
 
   </main>
 
-  <!-- Settings Modal Overlay -->
-  <div class="modal-overlay" id="settings-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">⚙️ API Settings</h3>
-        <button class="modal-close" id="btn-close-settings" aria-label="Close modal">&times;</button>
-      </div>
-      <form id="settings-form">
-        <div class="form-group">
-          <label for="provider-select">AI Provider</label>
-          <select id="provider-select" class="form-control">
-            <option value="groq">Groq (Ultra Fast)</option>
-            <option value="gemini">Google Gemini</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label for="api-key-input">API Key</label>
-          <input type="password" id="api-key-input" class="form-control" placeholder="Masukkan API Key Anda...">
-          <p class="info-note">API Key disimpan secara lokal di browser Anda dan tidak pernah dikirim ke pihak luar.</p>
-        </div>
-
-        <div class="form-group">
-          <label for="model-select">AI Model</label>
-          <select id="model-select" class="form-control">
-            <!-- Dynamically populated -->
-          </select>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" id="btn-close-settings-cancel" onclick="document.getElementById('settings-modal').classList.remove('active')">Batal</button>
-          <button type="submit" class="btn btn-primary">Simpan Pengaturan</button>
-        </div>
-      </form>
-    </div>
-  </div>
+  <!-- Settings modal removed -->
 
   <!-- Footer -->
   <footer>
