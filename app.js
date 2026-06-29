@@ -242,6 +242,69 @@ async function evaluateSentence(tense, prompt, sentence) {
   return data;
 }
 
+function generateWordDiffHTML(original, corrected) {
+  const origWords = original.trim().split(/\s+/);
+  const corrWords = corrected.trim().split(/\s+/);
+  
+  const n = origWords.length;
+  const m = corrWords.length;
+  const dp = Array(n + 1).fill(0).map(() => Array(m + 1).fill(0));
+  
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      const w1 = origWords[i-1].toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
+      const w2 = corrWords[j-1].toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
+      if (w1 === w2) {
+        dp[i][j] = dp[i-1][j-1] + 1;
+      } else {
+        dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+      }
+    }
+  }
+  
+  let i = n, j = m;
+  const diff = [];
+  
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0) {
+      const w1 = origWords[i-1].toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
+      const w2 = corrWords[j-1].toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
+      if (w1 === w2) {
+        diff.push({ type: 'equal', word: corrWords[j-1] });
+        i--;
+        j--;
+      } else if (dp[i-1][j] >= dp[i][j-1]) {
+        diff.push({ type: 'delete', word: origWords[i-1] });
+        i--;
+      } else {
+        diff.push({ type: 'insert', word: corrWords[j-1] });
+        j--;
+      }
+    } else if (i > 0) {
+      diff.push({ type: 'delete', word: origWords[i-1] });
+      i--;
+    } else {
+      diff.push({ type: 'insert', word: corrWords[j-1] });
+      j--;
+    }
+  }
+  
+  diff.reverse();
+  
+  let html = '';
+  diff.forEach(item => {
+    if (item.type === 'equal') {
+      html += `<span>${item.word} </span>`;
+    } else if (item.type === 'delete') {
+      html += `<span class="diff-original" style="text-decoration: line-through; color: var(--error); margin-right: 0.15rem; display: inline-block;">${item.word}</span> `;
+    } else if (item.type === 'insert') {
+      html += `<span class="diff-corrected" style="font-weight: 600; color: var(--success); margin-right: 0.15rem; display: inline-block;">${item.word}</span> `;
+    }
+  });
+  
+  return html.trim();
+}
+
 function displayEssayEvaluation(result) {
   document.getElementById('essay-loading').style.display = 'none';
   document.getElementById('essay-submit-btn').disabled = false;
@@ -308,10 +371,7 @@ function displayEssayEvaluation(result) {
     } else {
       tenseBlock.style.display = 'block';
       const diffContainer = document.getElementById('eval-diff-container');
-      diffContainer.innerHTML = `
-        <div><span class="diff-original">${result.original}</span></div>
-        <div style="margin-top:0.4rem"><span class="diff-corrected">${result.corrected_tense || result.corrected || ''}</span></div>
-      `;
+      diffContainer.innerHTML = generateWordDiffHTML(result.original, result.corrected_tense || result.corrected || '');
     }
     
     // Context Recommendation Block
